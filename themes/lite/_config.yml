@@ -11,7 +11,7 @@ background:
 
   # Custom Background Picture
   enable_picture: true
-  url: /static/images/miku.jpg
+  url: /static/images/zelda.jpg
   css_size: cover
   css_position: 50%
 
@@ -65,8 +65,8 @@ blur:
 
   gaussian_radius:
     top_navigator: 50 # 40px+ preferred
-    header: 30 # 5 ~ 50px preferred
-    footer: 40 # 5 ~ 100px preferred
+    header: 10 # 5 ~ 50px preferred
+    footer: 10 # 5 ~ 100px preferred
 
   font:
     color: '#ffffff' # only affect the font color in the blur area.
