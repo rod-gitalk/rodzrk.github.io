@@ -171,7 +171,6 @@
     .box {
       box-shadow: 0 0 0.1rem mix($--white, $--primary-color, 40%);
       transition: box-shadow 250ms;
-      margin: 0 -3rem 1rem -3rem;
       @media (max-width: $--small-screen-width) {
         margin: 0 -1rem 1rem -1rem;
       }
