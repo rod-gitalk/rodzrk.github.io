@@ -1,6 +1,6 @@
 ---
 title:
-- Rod's Blog
+- JanusGraph Index Problem
 archives:
 - /archives
 date:
@@ -17,10 +17,13 @@ photos:
 - /static/images/zelda.jpg
 ---
 
-## 一个关于JanusGraph的博客   
+## JanusGraph索引问题整理
 
 <!-- more -->
+![zelda](zelda.jpg)
+{% asset_img zelda.jpg This is an example image %}
 
 ```java
 String s = "JanusGraph";
+test
 ```
