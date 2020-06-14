@@ -29,8 +29,9 @@ menu:
   # Basic Menu
   Home: true
   Archives: true
-  Categories: false
-  Tags: false
+  Categories: true
+  Tags: true
+  About: /pages/about/index
 
   # Custom Menu
   # '/index' can be omitted
@@ -48,7 +49,7 @@ menu_icons:
   Archives: fa-archive
   Categories: fa-bookmark
   Tags: fa-hashtag
-  About: fa-smile-o
+  About: fa fa-user-circle-o
 
 # -------------------------------------------------------
 # Custom Blur
@@ -82,11 +83,11 @@ theme_layout:
 # -------------------------------------------------------
 
 social:
-  github: https://github.com/heskeybaozi
+  github: https://github.com/rodzrk
   weibo: http://weibo.com/52hezhiyu
 
   # Email link, reference to https://developer.mozilla.org/en-US/docs/Learn/HTML/Introduction_to_HTML/Creating_hyperlinks#E-mail_links
-  email: mailto:hezhiyu233@foxmail.com
+  email: mailto:rod_work@126.com
 
 
 social_icons:

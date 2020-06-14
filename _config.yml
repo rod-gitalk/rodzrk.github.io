@@ -3,8 +3,8 @@
 ## Source: https://github.com/hexojs/hexo/
 
 # Site
-title: Hexo
-subtitle: 'init my blog'
+title: Rod's Blog
+subtitle: ''
 description: ''
 keywords:
 author: rod
@@ -42,7 +42,7 @@ external_link:
 filename_case: 0
 render_drafts: false
 post_asset_folder: false
-relative_link: false
+relative_link: true
 future: true
 highlight:
   enable: true
@@ -77,7 +77,7 @@ meta_generator: true
 date_format: YYYY-MM-DD
 time_format: HH:mm:ss
 ## Use post's date for updated date unless set in front-matter
-use_date_for_updated: false
+use_date_for_updated: true
 
 # Pagination
 ## Set per_page to 0 to disable pagination
@@ -87,7 +87,6 @@ pagination_dir: page
 # Include / Exclude file(s)
 ## include:/exclude: options only apply to the 'source/' folder
 include:
-  exclude:https://github.com/HeskeyBaozi/hexo-theme-lite
 ignore:
 
 # Extensions
@@ -101,7 +100,7 @@ deploy:
   type: git
   repo: https://github.com/rodzrk/rodzrk.github.io.git
   branch: master
-  message: init my blogs
+  message: deploy my blogs
 
 # 文章字数统计
 symbols_count_time:

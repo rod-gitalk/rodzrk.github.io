@@ -119,7 +119,6 @@
       padding: 5px;
       border: 1px solid lighten($--primary-color, 80%);
       background-color: white;
-      margin: 0 -3rem 1rem -3rem;
 
       .photo-wrapper {
         height: 300px;
