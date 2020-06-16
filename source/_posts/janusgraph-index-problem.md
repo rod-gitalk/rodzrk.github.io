@@ -14,7 +14,8 @@ tags:
 comments:
 - false
 photos:
-- /static/images/zelda.jpg
+- /static/images/janusgraph.jfif
+- /static/images/elasticsearch.jpg
 ---
 
 # JanusGraph索引问题整理
@@ -25,6 +26,7 @@ photos:
 虽然可以支持事务,但其原子性仅保证了更新存储后端时该事务是原子操作,当更新索引后端数据时可能存在失败的场景,此时若未出现其他问题,仅更新索引失败,则事务不会回滚.因此,可能导致索引后端和存储后端数据不一致的场景.</p>
 
 <!-- more -->
+
 ### 1. 服务版本列表
 
 | 服务名 | Version |
@@ -255,10 +257,184 @@ java.io.IOException: Failure(s) in Elasicsearch bulk request: [{type=illegal_arg
 会向ES发送fields删除的脚本.首先,这部分脚本没有进行参数化;其次,JanusGraph
 构造脚本时,属性列表顺序并不是有序的,因此,虽然我们的使用场景中每次删除的都是不同节点上的相同属性,但可能每次执行删除操作时构造的脚本都不同,发送至ES后,ES每次都需重新编译,所以触发了这个问题.
 </p>
-<p style="text-indent: 2em">在JanusGraph0.5.x版本后,修复了这个问题,删除Fields时,使用的是参数化的语句,且脚本已经提前提交至ES进行了编译.</p>
+<p style="text-indent: 2em">在JanusGraph0.5.x版本后,修复了这个问题,删除Fields时,使用的是参数化的语句,且脚本已经提前提交至ES进行了编译.对于该问题的优化相关的解释可参考
+{% link "Elasticsearch Painless script编程" https://www.cnblogs.com/sanduzxcvbnm/p/12083590.html %}或{% link
+ ElasticSearch-DynamicScript使用总结 https://blog.tommyyang.cn/2018/10/28/ElasticSearch使用中遇到的DynamicScript的问题总结-2018/%}</p>
 <p style="text-indent: 2em">但是很可惜,我们的使用场景中无法升级JanusGraph版本至0.5.x,因为该版本以后JanusGraph不在支持ES5,我们的项目还不能升级ES
 版本,因此只能对之前的JanusGraph的代码进行修改.相关的修改如下:
 </p>
+<p style="text-indent: 2em">思路(参考JanusGraph0.5.x版本中的修复方案):
 
++  服务启动时,尝试存储可参数化的脚本至ES集群中.
++  使用脚本时,通过参数化的方式发送请求至ES集群,可以最有效的防止频繁进行脚本的编译.
 
-未完待续!
+</p>
+<p style="text-indent: 2em">代码修改时主要关注ElasticSearchIndex即可(其他已省略),可通过该类逐步完成所有修改.</p>
+
+```java ElasticSearchIndex.java
+...
+    // 添加需要执行的脚本
+    private static final String PARAMETERIZED_DELETION_SCRIPT = parameterizedScriptPrepare("",
+        "for (field in params.fields) {",
+        "    if (field.cardinality == 'SINGLE') {",
+        "        ctx._source.remove(field.name);",
+        "    } else if (ctx._source.containsKey(field.name)) {",
+        "        def fieldIndex = ctx._source[field.name].indexOf(field.value);",
+        "        if (fieldIndex >= 0 && fieldIndex < ctx._source[field.name].size()) {",
+        "            ctx._source[field.name].remove(fieldIndex);",
+        "        }",
+        "    }",
+        "}");
+
+    private static final String PARAMETERIZED_ADDITION_SCRIPT = parameterizedScriptPrepare("",
+        "for (field in params.fields) {",
+        "    if (ctx._source[field.name] == null) {",
+        "        ctx._source[field.name] = [];",
+        "    }",
+        "    if (field.cardinality != 'SET' || ctx._source[field.name].indexOf(field.value) == -1) {",
+        "        ctx._source[field.name].add(field.value);",
+        "    }",
+        "}");
+...
+    // 构造方法是重点,此处会将painless脚本通过_script端点存储至ES集群中
+    public ElasticSearchIndex(Configuration config) throws BackendException {
+        indexName = config.get(INDEX_NAME);
+        parameterizedAdditionScriptId = generateScriptId("add");
+        parameterizedDeletionScriptId = generateScriptId("del");
+        useAllField = config.get(USE_ALL_FIELD);
+        useExternalMappings = config.get(USE_EXTERNAL_MAPPINGS);
+        allowMappingUpdate = config.get(ALLOW_MAPPING_UPDATE);
+        createSleep = config.get(CREATE_SLEEP);
+        ingestPipelines = config.getSubset(ES_INGEST_PIPELINES);
+        final ElasticSearchSetup.Connection c = interfaceConfiguration(config);
+        client = c.getClient();
+
+        batchSize = config.get(INDEX_MAX_RESULT_SET_SIZE);
+        log.debug("Configured ES query nb result by query to {}", batchSize);
+
+        switch (client.getMajorVersion()) {
+            case FIVE:
+                compat = new ES5Compat();
+                break;
+            case SIX:
+                compat = new ES6Compat();
+                break;
+            default:
+                throw new PermanentBackendException("Unsupported Elasticsearch version: " + client.getMajorVersion());
+        }
+
+        try {
+            client.clusterHealthRequest(config.get(HEALTH_REQUEST_TIMEOUT));
+        } catch (final IOException e) {
+            throw new PermanentBackendException(e.getMessage(), e);
+        }
+        if (!config.has(USE_DEPRECATED_MULTITYPE_INDEX) && client.isIndex(indexName)) {
+            // upgrade scenario where multitype index was the default behavior
+            useMultitypeIndex = true;
+        } else {
+            useMultitypeIndex = config.get(USE_DEPRECATED_MULTITYPE_INDEX);
+            Preconditions.checkArgument(!useMultitypeIndex || !client.isAlias(indexName),
+                    "The key '" + USE_DEPRECATED_MULTITYPE_INDEX
+                    + "' cannot be true when existing index is split.");
+            Preconditions.checkArgument(useMultitypeIndex || !client.isIndex(indexName),
+                    "The key '" + USE_DEPRECATED_MULTITYPE_INDEX
+                    + "' cannot be false when existing index contains multiple types.");
+        }
+        indexSetting = new HashMap<>();
+
+        ElasticSearchSetup.applySettingsFromJanusGraphConf(indexSetting, config);
+        indexSetting.put("index.max_result_window", Integer.MAX_VALUE);
+
+        setupStoredScripts();
+    }
+...
+    // 该方法是执行请求的路口,在该方法中需要将原脚本修改为参数化脚本,防止触发ES保护机制
+    @Override
+    public void mutate(Map<String, Map<String, IndexMutation>> mutations, KeyInformation.IndexRetriever information,
+                       BaseTransaction tx) throws BackendException {
+        final List<ElasticSearchMutation> requests = new ArrayList<>();
+        try {
+            for (final Map.Entry<String, Map<String, IndexMutation>> stores : mutations.entrySet()) {
+                final List<ElasticSearchMutation> requestByStore = new ArrayList<>();
+                final String storeName = stores.getKey();
+                final String indexStoreName = getIndexStoreName(storeName);
+                for (final Map.Entry<String, IndexMutation> entry : stores.getValue().entrySet()) {
+                    final String documentId = entry.getKey();
+                    final IndexMutation mutation = entry.getValue();
+                    assert mutation.isConsolidated();
+                    Preconditions.checkArgument(!(mutation.isNew() && mutation.isDeleted()));
+                    Preconditions.checkArgument(!mutation.isNew() || !mutation.hasDeletions());
+                    Preconditions.checkArgument(!mutation.isDeleted() || !mutation.hasAdditions());
+                    //Deletions first
+                    if (mutation.hasDeletions()) {
+                        if (mutation.isDeleted()) {
+                            log.trace("Deleting entire document {}", documentId);
+                            requestByStore.add(ElasticSearchMutation.createDeleteRequest(indexStoreName, storeName,
+                                    documentId));
+                        } else {
+//                            final String script = getDeletionScript(information, storeName, mutation);
+//                            final Map<String,Object> doc = compat.prepareScript(script).build();
+                            List<Map<String, Object>> params = getParameters(information.get(storeName),
+                                mutation.getDeletions(), true);
+                            Map doc = compat.prepareStoredScript(parameterizedDeletionScriptId, params).build();
+                            log.trace("Deletion script {} with params {}", PARAMETERIZED_DELETION_SCRIPT, params);
+                            requestByStore.add(ElasticSearchMutation.createUpdateRequest(indexStoreName, storeName,
+                                    documentId, doc));
+                        }
+                    }
+                    if (mutation.hasAdditions()) {
+                        if (mutation.isNew()) { //Index
+                            log.trace("Adding entire document {}", documentId);
+                            final Map<String, Object> source = getNewDocument(mutation.getAdditions(),
+                                    information.get(storeName));
+                            requestByStore.add(ElasticSearchMutation.createIndexRequest(indexStoreName, storeName,
+                                    documentId, source));
+                        } else {
+                            final Map upsert;
+                            if (!mutation.hasDeletions()) {
+                                upsert = getNewDocument(mutation.getAdditions(), information.get(storeName));
+                            } else {
+                                upsert = null;
+                            }
+
+                            List<Map<String, Object>> params = getParameters(information.get(storeName),
+                                mutation.getAdditions(), false, Cardinality.SINGLE);
+                            if (!params.isEmpty()) {
+                                ImmutableMap.Builder builder = compat.prepareStoredScript(parameterizedAdditionScriptId, params);
+                                requestByStore.add(ElasticSearchMutation.createUpdateRequest(indexStoreName, storeName,
+                                    documentId, builder, upsert));
+                                log.trace("Adding script {} with params {}", PARAMETERIZED_ADDITION_SCRIPT, params);
+                            }
+//                            final String inline = getAdditionScript(information, storeName, mutation);
+//                            if (!inline.isEmpty()) {
+//                                final ImmutableMap.Builder builder = compat.prepareScript(inline);
+//                                requestByStore.add(ElasticSearchMutation.createUpdateRequest(indexStoreName, storeName,
+//                                        documentId, builder, upsert));
+//                                log.trace("Adding script {}", inline);
+//                            }
+
+                            final Map<String, Object> doc = getAdditionDoc(information, storeName, mutation);
+                            if (!doc.isEmpty()) {
+                                final ImmutableMap.Builder builder = ImmutableMap.builder().put(ES_DOC_KEY, doc);
+                                requestByStore.add(ElasticSearchMutation.createUpdateRequest(indexStoreName, storeName,
+                                        documentId, builder, upsert));
+                                log.trace("Adding update {}", doc);
+                            }
+                        }
+                    }
+                }
+                if (!requestByStore.isEmpty() && ingestPipelines.containsKey(storeName)) {
+                    client.bulkRequest(requestByStore, String.valueOf(ingestPipelines.get(storeName)));
+                } else if (!requestByStore.isEmpty()) {
+                    requests.addAll(requestByStore);
+                }
+            }
+            if (!requests.isEmpty()) {
+                client.bulkRequest(requests, null);
+            }
+        } catch (final Exception e) {
+            log.error("Failed to execute bulk Elasticsearch mutation", e);
+            throw convert(e);
+        }
+    }
+```
