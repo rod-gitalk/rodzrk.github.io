@@ -265,8 +265,8 @@ java.io.IOException: Failure(s) in Elasicsearch bulk request: [{type=illegal_arg
 </p>
 <p style="text-indent: 2em">思路(参考JanusGraph0.5.x版本中的修复方案):
 
-+  服务启动时,尝试存储可参数化的脚本至ES集群中.
-+  使用脚本时,通过参数化的方式发送请求至ES集群,可以最有效的防止频繁进行脚本的编译.
+-  服务启动时,尝试存储可参数化的脚本至ES集群中.
+-  使用脚本时,通过参数化的方式发送请求至ES集群,可以最有效的防止频繁进行脚本的编译.
 
 </p>
 <p style="text-indent: 2em">代码修改时主要关注ElasticSearchIndex即可(其他已省略),可通过该类逐步完成所有修改.</p>
@@ -344,7 +344,8 @@ java.io.IOException: Failure(s) in Elasicsearch bulk request: [{type=illegal_arg
 
         ElasticSearchSetup.applySettingsFromJanusGraphConf(indexSetting, config);
         indexSetting.put("index.max_result_window", Integer.MAX_VALUE);
-
+        
+        // 通过该方法在服务启动时存储脚本,注意存储脚本时需要注意版本兼容性问题
         setupStoredScripts();
     }
 ...
@@ -438,3 +439,5 @@ java.io.IOException: Failure(s) in Elasicsearch bulk request: [{type=illegal_arg
         }
     }
 ```
+
+<p style="text-indent: 2em">由于存储脚本的API在不同的版本中存在变化,因此需要对此部分做兼容处理,相关变化详见{% post_link elasticsearch-scripting-module %}</p>
