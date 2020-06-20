@@ -14,6 +14,10 @@
       <span class="create-time">{{ target.date | format(date_format) }}, {{ target.date | format(time_format) }}</span>
     </p>
 
+    <p>
+      <span id="busuanzi_container_page_pv">本文总阅读量<span id="busuanzi_value_page_pv"></span>次</span>
+    </p>
+
     <!--categories & tags-->
     <div v-if="!isImplicit" class="categories-and-tags">
       <div v-if="lastCategory.length" class="categories">
@@ -54,7 +58,8 @@
                          :slugOrSource="isImplicit ? $route.path : `posts/${target.slug}`"></gitment-comment>
       </div>
     </div>
-
+    <!--    自定义footer-->
+    <footerCustome :parentData="target"></footerCustome>
     <!--back to top-->
     <end-of-file></end-of-file>
 

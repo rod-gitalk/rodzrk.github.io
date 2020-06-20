@@ -4,6 +4,7 @@ import ArticleCard from '@/views/components/article-card/ArticleCard.vue';
 import DetailableContent from '@/views/components/detailable-content/DetailableContent.vue';
 import GitmentComment from '@/views/components/gitment-comment/GitmentComment.vue';
 import EndOfFile from '@/views/components/eof/EndOfFile.vue';
+import footerCustome from '@/views/pages/custompage/footer.vue';
 import { Article, Detailable, Page } from '@/models/article.class';
 import { Modal } from '@/models/modal.class';
 import { Post } from '@/models/posts-list.class';
@@ -13,7 +14,7 @@ declare const window: Window;
 
 @Component({
   name: 'detailable-page',
-  components: { ArticleCard, EndOfFile, DetailableContent, GitmentComment },
+  components: { ArticleCard, EndOfFile, DetailableContent, GitmentComment,footerCustome },
   props: {
     date_format: {
       required: true,
