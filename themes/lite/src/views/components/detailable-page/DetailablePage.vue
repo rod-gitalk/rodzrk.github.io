@@ -55,6 +55,9 @@
       </div>
     </div>
 
+    <!--  detailable-footer  -->
+    <detailable-footer :target=target :modal=modal></detailable-footer>
+
     <!--back to top-->
     <end-of-file></end-of-file>
 
@@ -72,6 +75,7 @@
 
     > * {
       margin: 0 0 1rem 0;
+
       &:last-child {
         margin: 0;
       }
@@ -80,6 +84,7 @@
     .title {
       font-size: 1.5rem;
       margin: 0 0 0.5rem 0;
+
       .external-link {
         font-size: 0.8em;
       }
@@ -95,19 +100,24 @@
       display: flex;
       justify-content: center;
       flex-flow: row wrap;
+
       > * {
         margin-right: 1rem;
+
         &:last-child {
           margin-right: 0;
         }
       }
+
       a {
         border-bottom: 1px solid rgba(0, 0, 0, 0);
         transition: all 200ms;
+
         &:hover {
           border-bottom-color: #5c5c5c;
         }
       }
+
       .tags, .categories {
         > * {
           margin-right: 0.5rem;
@@ -127,6 +137,7 @@
         align-items: center;
         overflow: hidden;
         cursor: zoom-in;
+
         > img {
           max-width: 100%;
         }
@@ -137,6 +148,7 @@
       box-shadow: 0 0 0.1rem lighten($--primary-color, 40%);
       transition: box-shadow 250ms;
       margin-bottom: 1rem;
+
       &:hover {
         box-shadow: 0 0 0.3rem $--primary-color;
       }

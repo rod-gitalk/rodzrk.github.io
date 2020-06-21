@@ -2,18 +2,19 @@ import Vue from 'vue';
 import Component from 'vue-class-component';
 import ArticleCard from '@/views/components/article-card/ArticleCard.vue';
 import DetailableContent from '@/views/components/detailable-content/DetailableContent.vue';
+import DetailableFooter from '@/views/components/detailable-footer/DetailableFooter.vue';
 import GitmentComment from '@/views/components/gitment-comment/GitmentComment.vue';
 import EndOfFile from '@/views/components/eof/EndOfFile.vue';
-import { Article, Detailable, Page } from '@/models/article.class';
-import { Modal } from '@/models/modal.class';
-import { Post } from '@/models/posts-list.class';
+import {Article, Detailable, Page} from '@/models/article.class';
+import {Modal} from '@/models/modal.class';
+import {Post} from '@/models/posts-list.class';
 
 declare const window: Window;
 
 
 @Component({
   name: 'detailable-page',
-  components: { ArticleCard, EndOfFile, DetailableContent, GitmentComment },
+  components: {ArticleCard, EndOfFile, DetailableContent, GitmentComment, DetailableFooter},
   props: {
     date_format: {
       required: true,
@@ -52,7 +53,7 @@ export default class DetailablePage extends Vue {
     return '';
   }
 
-  showPhotoDetail({ url, post }: { url: string, post: Post }) {
+  showPhotoDetail({url, post}: { url: string, post: Post }) {
     this.$data.modal.post = post;
     this.$data.modal.url = url;
     this.$nextTick(() => {
