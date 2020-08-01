@@ -11,6 +11,8 @@ categories:
 tags:
 - janusgraph
 - index
+keywords: 'JanusGraph index delete '
+description: JanusGraph索引问题的一些整理
 comments:
 - false
 photos:
@@ -213,7 +215,9 @@ photos:
 <p style="text-indent: 2em">以上场景最简单的解决方案就是重试,但老版本(目前0.5.x以前的版本应该都没有,只确认了一部分)的JanusGraph中Es
 的客户端实现中没有添加重试的配置,最快速的方法时升级JanusGraph版本至0.5.0以上</p>
 
-<p style="text-indent: 2em">es客户端重试配置的添加可见: {% link issues#1797 https://github.com/JanusGraph/janusgraph/issues/1797 %} </p>
+{% note warning %}
+es客户端重试配置的添加可见: {% link issues#1797 https://github.com/JanusGraph/janusgraph/issues/1797 %}
+{% endnote %}
 
 #### 3.2 es某时间段编译大量脚本报错
 
@@ -440,4 +444,6 @@ java.io.IOException: Failure(s) in Elasicsearch bulk request: [{type=illegal_arg
     }
 ```
 
-<p style="text-indent: 2em">由于存储脚本的API在不同的版本中存在变化,因此需要对此部分做兼容处理,相关变化详见{% post_link elasticsearch-scripting-module %}</p>
+{% note warning %}
+由于存储脚本的API在不同的版本中存在变化,因此需要对此部分做兼容处理,相关变化详见{% post_link elasticsearch-scripting-module %}
+{% endnote %}
