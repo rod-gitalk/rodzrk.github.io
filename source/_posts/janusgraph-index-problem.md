@@ -15,9 +15,7 @@ keywords: 'JanusGraph index delete '
 description: JanusGraph索引问题的一些整理
 comments:
 - false
-photos:
-- /static/images/janusgraph.jfif
-- /static/images/elasticsearch.jpg
+cover: /static/images/janusgraph.jfif
 ---
 
 # JanusGraph索引问题整理

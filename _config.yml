@@ -100,7 +100,7 @@ deploy:
   type: git
   repo: https://github.com/rodzrk/rodzrk.github.io.git
   branch: master
-  message: Compress picture
+  message: update post `elasticsearch scripting module`
 
 # 文章字数统计
 symbols_count_time:

@@ -1,8 +1,10 @@
 ---
 title: elasticsearch scripting module
 date: 2020-06-17 22:43:56
+updated: 2020-08-02 22:00:00
 tags: elasticsearch
 categories: elasticsearch
+cover: /static/images/elasticsearch.jpg
 ---
 
 # ES脚本模块API兼容性问题
@@ -16,16 +18,15 @@ categories: elasticsearch
 
 可以使用_scripts端点将脚本存储在集群或者从集群中检索脚本.如果ES启用了安全功能,则必须拥有以下权限才能创建、检索或者删除存储的脚本。
 
-- cluster: `all` or `manage`
-
-
-查看更多信息,请参阅 {% link Security privileges https://www.elastic.co/guide/en/elasticsearch/reference/master/security-privileges.html %}
-
+{% note info %}
+查看更多安全功能相关信息,请参阅 {% link Security privileges https://www.elastic.co/guide/en/elasticsearch/reference/master/security
+-privileges.html %}
+{% endnote %}
 ### 1. 5.3.x-5.5.x
 
 #### 1.1 存储脚本请求
 
-```
+``` http request
 /_scripts/{id}
 ```
 
@@ -37,7 +38,7 @@ categories: elasticsearch
 
 </p>
 
-```
+``` http request
 POST _scripts/calculate-score
 {
   "script": {
@@ -49,13 +50,13 @@ POST _scripts/calculate-score
 
 #### 1.2 检索已创建的脚本
 
-```
+``` http request
 GET _scripts/calculate-score
 ```
 
 #### 1.3 使用存储的脚本
 
-```
+``` http request
 GET _search
 {
   "query": {
@@ -72,7 +73,7 @@ GET _search
 ```
 
 #### 1.4 删除存储的脚本
-```
+``` http request
 DELETE _scripts/calculate-score
 ```
 
@@ -80,7 +81,7 @@ DELETE _scripts/calculate-score
 
 #### 2.1 存储脚本请求
 
-```
+``` http request
 /_scripts/{id}
 ```
 
@@ -92,7 +93,7 @@ DELETE _scripts/calculate-score
 
 </p>
 
-```
+``` http request
 POST _scripts/calculate-score
 {
   "script": {
@@ -105,13 +106,13 @@ POST _scripts/calculate-score
 
 #### 2.2 检索已创建的脚本
 
-```
+``` http request
 GET _scripts/calculate-score
 ```
 
 #### 2.3 使用存储的脚本
 
-```
+``` http request
 GET _search
 {
   "query": {
@@ -128,10 +129,12 @@ GET _search
 ```
 **注: 使用存储的脚本时API发生了变化,`stored`修改为了`id`**
 #### 2.4 删除存储的脚本
-```
+``` http request
 DELETE _scripts/calculate-score
 ```
 
 
 ## 参考文档
+{% note info %}
 {% link How to use scripts(master) https://www.elastic.co/guide/en/elasticsearch/reference/master/modules-scripting-using.html %}
+{% endnote %}
