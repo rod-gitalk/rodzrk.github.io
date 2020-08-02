@@ -5,6 +5,7 @@ updated: 2020-08-02 22:00:00
 tags: elasticsearch
 categories: elasticsearch
 cover: /static/images/elasticsearch.jpg
+top_img: /static/images/default_article_cover.webp
 ---
 
 # ES脚本模块API兼容性问题

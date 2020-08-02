@@ -16,6 +16,7 @@ description: JanusGraph索引问题的一些整理
 comments:
 - false
 cover: /static/images/janusgraph.jfif
+top_img: /static/images/Star_track.webp
 ---
 
 # JanusGraph索引问题整理
